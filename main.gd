@@ -46,9 +46,6 @@ func _init()->void:
 		NET_SERVER:
 			OS.set_window_title("SERVER")
 			_socket = WebSocketServer.new()
-			
-			_spawn_client()
-			_spawn_client()
 
 func _spawn_client()->void:
 	var client_args := ["CLIENT", "%s%s" % [PORT_PREFIX, PORT]]
