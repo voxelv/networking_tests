@@ -102,13 +102,19 @@ func _ready() -> void:
 
 # Server-only
 func _client_connected(id, proto):
-	print("Client %d connected with protocol: %s" % [id, proto])
+	var s := "Client %d connected with protocol: %s" % [id, proto]
+	print(s)
+	add_message(s)
 	
 func _close_request(id, code, reason):
-	print("Client %d disconnecting with code: %d, reason: %s" % [id, code, reason])
+	var s := "Client %d disconnecting with code: %d, reason: %s" % [id, code, reason]
+	print(s)
+	add_message(s)
 	
 func _disconnected(id, was_clean = false):
-	print("Client %d disconnected, clean: %s" % [id, str(was_clean)])
+	var s := "Client %d disconnected, clean: %s" % [id, str(was_clean)]
+	print(s)
+	add_message(s)
 	var c_pid := -1
 	for pid in pid_to_peerid.keys():
 		if pid_to_peerid[pid] == id:
@@ -130,7 +136,7 @@ func _on_data_from_client(id):
 
 # Client-only
 func _closed(was_clean:bool=false):
-	print("Client closed, clean: ", was_clean)
+	print("Client %d closed, clean: " % client_peerid, was_clean)
 	set_process(false)
 	get_tree().quit(0)
 	

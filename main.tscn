@@ -18,39 +18,69 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="VBoxContainer" type="VBoxContainer" parent="ui"]
+[node name="MarginContainer" type="MarginContainer" parent="ui"]
 anchor_right = 1.0
 anchor_bottom = 1.0
+custom_constants/margin_right = 4
+custom_constants/margin_top = 4
+custom_constants/margin_left = 4
+custom_constants/margin_bottom = 4
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="top_button_list" type="HBoxContainer" parent="ui/VBoxContainer"]
-margin_right = 400.0
+[node name="VBoxContainer" type="VBoxContainer" parent="ui/MarginContainer"]
+margin_left = 4.0
+margin_top = 4.0
+margin_right = 396.0
+margin_bottom = 596.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="ui/MarginContainer/VBoxContainer"]
+margin_right = 392.0
 margin_bottom = 24.0
 
-[node name="pressme_button" type="Button" parent="ui/VBoxContainer/top_button_list"]
+[node name="top_button_list" type="HBoxContainer" parent="ui/MarginContainer/VBoxContainer/HBoxContainer3"]
+margin_right = 75.0
+margin_bottom = 24.0
+
+[node name="pressme_button" type="Button" parent="ui/MarginContainer/VBoxContainer/HBoxContainer3/top_button_list"]
 margin_right = 75.0
 margin_bottom = 24.0
 text = "PRESS ME"
 
-[node name="PanelContainer" type="PanelContainer" parent="ui/VBoxContainer"]
+[node name="Control" type="Control" parent="ui/MarginContainer/VBoxContainer/HBoxContainer3"]
+margin_left = 80.0
+margin_right = 340.0
+margin_bottom = 24.0
+size_flags_horizontal = 3
+
+[node name="clear_button" type="Button" parent="ui/MarginContainer/VBoxContainer/HBoxContainer3"]
+margin_left = 345.0
+margin_right = 392.0
+margin_bottom = 24.0
+text = "Clear"
+
+[node name="PanelContainer" type="PanelContainer" parent="ui/MarginContainer/VBoxContainer"]
 margin_top = 29.0
-margin_right = 400.0
-margin_bottom = 529.0
+margin_right = 392.0
+margin_bottom = 528.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
 custom_styles/panel = SubResource( 1 )
 
-[node name="scroll_container" type="ScrollContainer" parent="ui/VBoxContainer/PanelContainer"]
-margin_right = 400.0
-margin_bottom = 500.0
-rect_min_size = Vector2( 0, 500 )
+[node name="scroll_container" type="ScrollContainer" parent="ui/MarginContainer/VBoxContainer/PanelContainer"]
+margin_right = 392.0
+margin_bottom = 499.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 scroll_horizontal_enabled = false
 
-[node name="messages_list" type="VBoxContainer" parent="ui/VBoxContainer/PanelContainer/scroll_container"]
-margin_right = 400.0
-margin_bottom = 500.0
+[node name="messages_list" type="VBoxContainer" parent="ui/MarginContainer/VBoxContainer/PanelContainer/scroll_container"]
+margin_right = 392.0
+margin_bottom = 499.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 custom_constants/separation = 0
@@ -58,34 +88,44 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="HBoxContainer" type="HBoxContainer" parent="ui/VBoxContainer"]
-margin_top = 534.0
-margin_right = 400.0
-margin_bottom = 564.0
+[node name="HBoxContainer2" type="HBoxContainer" parent="ui/MarginContainer/VBoxContainer"]
+margin_top = 533.0
+margin_right = 392.0
+margin_bottom = 557.0
+
+[node name="entry_line" type="LineEdit" parent="ui/MarginContainer/VBoxContainer/HBoxContainer2"]
+margin_right = 341.0
+margin_bottom = 24.0
+size_flags_horizontal = 3
+
+[node name="send_button" type="Button" parent="ui/MarginContainer/VBoxContainer/HBoxContainer2"]
+margin_left = 346.0
+margin_right = 392.0
+margin_bottom = 24.0
+text = "Send"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="ui/MarginContainer/VBoxContainer"]
+margin_top = 562.0
+margin_right = 392.0
+margin_bottom = 592.0
 custom_constants/separation = 0
 
-[node name="autoscroll_checkbox" type="CheckBox" parent="ui/VBoxContainer/HBoxContainer"]
+[node name="autoscroll_checkbox" type="CheckBox" parent="ui/MarginContainer/VBoxContainer/HBoxContainer"]
 margin_right = 30.0
 margin_bottom = 30.0
 
-[node name="Label" type="Label" parent="ui/VBoxContainer/HBoxContainer"]
+[node name="Label" type="Label" parent="ui/MarginContainer/VBoxContainer/HBoxContainer"]
 margin_left = 30.0
 margin_top = 3.0
 margin_right = 110.0
 margin_bottom = 27.0
 text = "Auto-scroll"
 
-[node name="Control" type="Control" parent="ui/VBoxContainer/HBoxContainer"]
+[node name="Control" type="Control" parent="ui/MarginContainer/VBoxContainer/HBoxContainer"]
 margin_left = 110.0
-margin_right = 353.0
+margin_right = 392.0
 margin_bottom = 30.0
 size_flags_horizontal = 3
-
-[node name="clear_button" type="Button" parent="ui/VBoxContainer/HBoxContainer"]
-margin_left = 353.0
-margin_right = 400.0
-margin_bottom = 30.0
-text = "Clear"
-[connection signal="pressed" from="ui/VBoxContainer/top_button_list/pressme_button" to="." method="_on_pressme_button_pressed"]
-[connection signal="toggled" from="ui/VBoxContainer/HBoxContainer/autoscroll_checkbox" to="." method="_on_autoscroll_checkbox_toggled"]
-[connection signal="pressed" from="ui/VBoxContainer/HBoxContainer/clear_button" to="." method="_on_clear_button_pressed"]
+[connection signal="pressed" from="ui/MarginContainer/VBoxContainer/HBoxContainer3/top_button_list/pressme_button" to="." method="_on_pressme_button_pressed"]
+[connection signal="pressed" from="ui/MarginContainer/VBoxContainer/HBoxContainer3/clear_button" to="." method="_on_clear_button_pressed"]
+[connection signal="toggled" from="ui/MarginContainer/VBoxContainer/HBoxContainer/autoscroll_checkbox" to="." method="_on_autoscroll_checkbox_toggled"]
