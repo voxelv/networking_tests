@@ -55,7 +55,10 @@ func _spawn_client()->void:
 	pid_to_peerid[c_pid] = INVALID_PEERID
 
 func _request_client_quit(pid:int)->void:
-	_socket.get_peer(pid_to_peerid[pid]).put_packet("QUIT".to_utf8())
+	var pkt := PKT.make_pkt(
+		PKT.pkt_type.PKT_COMMAND, 
+		{'command': PKT.cmd_type.CMD_QUIT})
+	_socket.get_peer(pid_to_peerid[pid]).put_var(pkt)
 
 func _ready() -> void:
 	for i in range(len(cli_args)):
@@ -88,6 +91,7 @@ func _ready() -> void:
 			err = (_socket as WebSocketClient).connect_to_url("%s:%d" % [URL, port_to_use])
 			if err != OK:
 				set_process(false)
+	_socket.set_allow_object_decoding(true)
 	
 	# Add special stuff
 	match control_mode:
@@ -120,16 +124,22 @@ func _disconnected(id, was_clean = false):
 	pid_to_peerid.erase(c_pid)
 	
 func _on_data_from_client(id):
-	var pkt := _socket.get_peer(id).get_packet()
-	var data := pkt.get_string_from_utf8()
-	add_message("Client %d: %s" % [id, data])
+	var pkt := _socket.get_peer(id).get_var() as Dictionary
+	var s := ""
+	match pkt.get('type', PKT.pkt_type.PKT_UNKNOWN):
+		PKT.pkt_type.PKT_STRING:
+			s = pkt['string']
+		PKT.pkt_type.PKT_UNKNOWN, _:
+			pass
+	add_message("Client %d: %s" % [id, s])
 	
-	if PID_PREFIX in data:
+	if PID_PREFIX in s:
 		var pid:int
-		pid = int(data.replace(PID_PREFIX, ""))
+		pid = int(s.replace(PID_PREFIX, ""))
 		pid_to_peerid[pid] = id
 		var peerid_data := "%s%d" % [PEERID_PREFIX, id]
-		_socket.get_peer(id).put_packet(peerid_data.to_utf8())
+		pkt = PKT.make_pkt(PKT.pkt_type.PKT_STRING, {'string':peerid_data})
+		_socket.get_peer(id).put_var(pkt)
 
 # Client-only
 func _closed(was_clean:bool=false):
@@ -140,20 +150,29 @@ func _closed(was_clean:bool=false):
 func _connected_to_server(proto:String):
 	add_message("Connected (%s)." % proto)
 	var data := "%s%s" % [PID_PREFIX, OS.get_process_id()]
-	_socket.get_peer(1).put_packet(data.to_utf8())
+	var pkt := PKT.make_pkt(PKT.pkt_type.PKT_STRING, {'string':data})
+	_socket.get_peer(1).put_var(pkt)
 	
 func _on_data_from_server():
-	var data := _socket.get_peer(1).get_packet().get_string_from_utf8()
-	add_message(data)
+	var pkt := _socket.get_peer(1).get_var() as Dictionary
+	print(str(pkt))
+	_socket.get_peer(1).put_var(pkt)
 	
-	_socket.get_peer(1).put_packet(data.to_utf8())
-	
-	if PEERID_PREFIX in data:
-		client_peerid = int(data.replace(PEERID_PREFIX, ""))
-		_update_client_peerid()
-	
-	if QUIT_PREFIX in data:
-		get_tree().quit()
+	match pkt['type']:
+		PKT.pkt_type.PKT_STRING:
+			var s := pkt['string'] as String
+			add_message(s)
+			if PEERID_PREFIX in s:
+				client_peerid = int(s.replace(PEERID_PREFIX, ""))
+				_update_client_peerid()
+		PKT.pkt_type.PKT_COMMAND:
+			match pkt['command']:
+				_:
+					pass
+				PKT.cmd_type.CMD_QUIT:
+					get_tree().quit()
+		PKT.pkt_type.PKT_UNKNOWN, _:
+			pass
 
 func _update_client_peerid()->void:
 	var s := "CLIENT %d" % client_peerid
@@ -212,10 +231,12 @@ func _on_pressme_button_pressed() -> void:
 			data = "SERVER BROADCAST"
 			for peerid in pid_to_peerid.values():
 				if peerid != INVALID_PEERID:
-					_socket.get_peer(peerid).put_packet(data.to_utf8())
+					var pkt := PKT.make_pkt(PKT.pkt_type.PKT_STRING, {'string':data})
+					_socket.get_peer(peerid).put_var(pkt)
 		NET_CLIENT:
 			data = "CLIENT TO SERVER"
-			_socket.get_peer(1).put_packet(data.to_utf8())
+			var pkt := PKT.make_pkt(PKT.pkt_type.PKT_STRING, {'string':data})
+			_socket.get_peer(1).put_var(pkt)
 
 func _on_autoscroll_checkbox_toggled(button_pressed: bool) -> void:
 	autoscroll = button_pressed
@@ -223,3 +244,8 @@ func _on_autoscroll_checkbox_toggled(button_pressed: bool) -> void:
 func _on_clear_button_pressed() -> void:
 	for c in messages_list.get_children():
 		c.queue_free()
+
+func _on_send_button_pressed() -> void:
+	var s := (find_node("entry_line") as LineEdit).text
+	var pkt := PKT.make_pkt(PKT.pkt_type.PKT_STRING, {'string':s})
+	_socket.get_peer(1).put_var(pkt)

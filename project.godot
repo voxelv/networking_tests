@@ -19,6 +19,10 @@ config/name="networking_tests"
 run/main_scene="res://main.tscn"
 config/icon="res://icon.png"
 
+[autoload]
+
+PKT="*res://main/lib/pkt_util.gd"
+
 [display]
 
 window/size/width=400
