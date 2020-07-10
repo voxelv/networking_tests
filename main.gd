@@ -88,9 +88,7 @@ func _ready() -> void:
 			if err != OK:
 				set_process(false)
 		NET_CLIENT:
-			err = (_socket as WebSocketClient).connect_to_url("%s:%d" % [URL, port_to_use])
-			if err != OK:
-				set_process(false)
+			_client_attempt_connection()
 	_socket.set_allow_object_decoding(true)
 	
 	# Add special stuff
@@ -142,10 +140,19 @@ func _on_data_from_client(id):
 		_socket.get_peer(id).put_var(pkt)
 
 # Client-only
+func _client_attempt_connection()->void:
+	var status := _socket.get_connection_status()
+	if status != NetworkedMultiplayerPeer.CONNECTION_DISCONNECTED:
+		return
+	add_message("Connecting...")
+	set_process(true)
+	var err := (_socket as WebSocketClient).connect_to_url("%s:%d" % [URL, port_to_use])
+	if err != OK:
+		set_process(false)
+
 func _closed(was_clean:bool=false):
 	print("Client %d closed, clean: " % client_peerid, was_clean)
 	set_process(false)
-	get_tree().quit(0)
 	
 func _connected_to_server(proto:String):
 	add_message("Connected (%s)." % proto)
@@ -167,10 +174,10 @@ func _on_data_from_server():
 				_update_client_peerid()
 		PKT.pkt_type.PKT_COMMAND:
 			match pkt['command']:
-				_:
-					pass
 				PKT.cmd_type.CMD_QUIT:
 					get_tree().quit()
+				_:
+					pass
 		PKT.pkt_type.PKT_UNKNOWN, _:
 			pass
 
@@ -249,3 +256,9 @@ func _on_send_button_pressed() -> void:
 	var s := (find_node("entry_line") as LineEdit).text
 	var pkt := PKT.make_pkt(PKT.pkt_type.PKT_STRING, {'string':s})
 	_socket.get_peer(1).put_var(pkt)
+
+
+func _on_reconnect_timer_timeout() -> void:
+	match control_mode:
+		NET_CLIENT:
+			_client_attempt_connection()

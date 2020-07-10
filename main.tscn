@@ -126,7 +126,11 @@ margin_left = 110.0
 margin_right = 392.0
 margin_bottom = 30.0
 size_flags_horizontal = 3
+
+[node name="reconnect_timer" type="Timer" parent="."]
+autostart = true
 [connection signal="pressed" from="ui/MarginContainer/VBoxContainer/HBoxContainer3/top_button_list/pressme_button" to="." method="_on_pressme_button_pressed"]
 [connection signal="pressed" from="ui/MarginContainer/VBoxContainer/HBoxContainer3/clear_button" to="." method="_on_clear_button_pressed"]
 [connection signal="pressed" from="ui/MarginContainer/VBoxContainer/HBoxContainer2/send_button" to="." method="_on_send_button_pressed"]
 [connection signal="toggled" from="ui/MarginContainer/VBoxContainer/HBoxContainer/autoscroll_checkbox" to="." method="_on_autoscroll_checkbox_toggled"]
+[connection signal="timeout" from="reconnect_timer" to="." method="_on_reconnect_timer_timeout"]
